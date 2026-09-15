@@ -1,0 +1,3 @@
+getchar(), fgets() read data from fd = 0 (which is stdin) 
+
+when using fd = 0 to 'content' and stdin' -> 

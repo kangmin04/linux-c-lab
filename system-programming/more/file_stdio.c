@@ -1,7 +1,7 @@
 #include<stdio.h> 
 
 int main(void){
-
+/*
 	int ch;  // NOT CHAR. when getchar reached end, it returns EOF. EOF often regarded as -1 and it return with 32 bits. . char is 8 bit and (-128~ 127 OR 0 ~ 255) so when we convert 32 bits to 8 bits, we got loss for 3bytes. SO.. -1 is 0xFFFFFFFF -> 0xFF. 
 		 // char is regarded diffrently depends on os, compiler. THEY HAVE LOSS! so instead, we use 32 bits int. 
 	printf("ENTER RANDOM CHAR\n"); 
@@ -10,8 +10,7 @@ int main(void){
 
 	printf("YOUR CHAR IS : "); 
 	putchar(ch); 
-	putchar('\n'); 
-
+	putchar('\n');
 	printf("----------\n"); 
 
 	char line[256]; 
@@ -20,7 +19,19 @@ int main(void){
 		printf("UR NAME : %s\n", line); 
 	}
 
-
+*/
 	fputs("THIS LINE IS BY FPUTS", stdout); 
+	fputs("test FIle2", stdout); 
+	int count = 0;
+	char randomStr[256] = "Why does this work";  
+	while(count < 3){
+		count++;
+		printf("before flush"); 
+		fputs(randomStr, stdout);
+		printf("after flush"); 
+		fflush(stdout);  
+	}
+	printf("After 3 iteration"); 
+	fflush(stdout);
 	return 0; 
 }
