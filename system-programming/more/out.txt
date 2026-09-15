@@ -1,0 +1,63 @@
+HEAD(1)                               User Commands                              HEAD(1)
+test 0
+test 1NAME
+test 2       head - output the first part of files
+test 3
+test 4[7m--More(press enter to continue)--]mSYNOPSIS
+test 0       head [OPTION]... [FILE]...
+test 1
+test 2DESCRIPTION
+test 3       Print  the  first  10  lines of each FILE to standard output.  With more than one
+test 4[7m--More(press enter to continue)--]m       FILE, precede each with a header giving the file name.
+test 0
+test 1       With no FILE, or when FILE is -, read standard input.
+test 2
+test 3       Mandatory arguments to long options are mandatory for short options too.
+test 4[7m--More(press enter to continue)--]m
+test 0       -c, --bytes=[-]NUM
+test 1              print the first NUM bytes of each file; with the leading  '-',  print  all
+test 2              but the last NUM bytes of each file
+test 3
+test 4[7m--More(press enter to continue)--]m       -n, --lines=[-]NUM
+test 0              print  the  first NUM lines instead of the first 10; with the leading '-',
+test 1              print all but the last NUM lines of each file
+test 2
+test 3       -q, --quiet, --silent
+test 4[7m--More(press enter to continue)--]m              never print headers giving file names
+test 0
+test 1       -v, --verbose
+test 2              always print headers giving file names
+test 3
+test 4[7m--More(press enter to continue)--]m       -z, --zero-terminated
+test 0              line delimiter is NUL, not newline
+test 1
+test 2       --help display this help and exit
+test 3
+test 4[7m--More(press enter to continue)--]m       --version
+test 0              output version information and exit
+test 1
+test 2       NUM may have a multiplier suffix: b  512,  kB  1000,  K  1024,  MB  1000*1000,  M
+test 3       1024*1024,  GB  1000*1000*1000, G 1024*1024*1024, and so on for T, P, E, Z, Y, R,
+test 4[7m--More(press enter to continue)--]m       Q.  Binary prefixes can be used, too: KiB=K, MiB=M, and so on.
+test 0
+test 1AUTHOR
+test 2       Written by David MacKenzie and Jim Meyering.
+test 3
+test 4[7m--More(press enter to continue)--]mREPORTING BUGS
+test 0       GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
+test 1       Report any translation bugs to <https://translationproject.org/team/>
+test 2
+test 3COPYRIGHT
+test 4[7m--More(press enter to continue)--]m       Copyright © 2023 Free Software Foundation, Inc.  License GPLv3+: GNU GPL  version
+test 0       3 or later <https://gnu.org/licenses/gpl.html>.
+test 1       This  is  free software: you are free to change and redistribute it.  There is NO
+test 2       WARRANTY, to the extent permitted by law.
+test 3
+test 4[7m--More(press enter to continue)--]mSEE ALSO
+test 0       tail(1)
+test 1
+test 2       Full documentation <https://www.gnu.org/software/coreutils/head>
+test 3       or available locally via: info '(coreutils) head invocation'
+test 4[7m--More(press enter to continue)--]m
+test 0GNU coreutils 9.4                      August 2026                               HEAD(1)
+test 1

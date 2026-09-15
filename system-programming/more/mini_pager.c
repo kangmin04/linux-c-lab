@@ -23,10 +23,10 @@ int main(int argc, char *argv[]){
 
 		if(count == PAGELEN){
 			count = 0; 
-			printf("\033[7m--More(press enter to continue)--\033]m"); 
+			// ESC + [ !! 
+			printf("\033[7m--More(press enter to continue)--\033[m"); 
 			fflush(stdout); 
-			// read from stdin. IF input is redirectioned, THIS DOESNT WORK. 
-			continue; 
+			getchar(); // read from stdin. IF input is redirectioned, THIS DOESNT WORK. 
 		}
 	}
 
