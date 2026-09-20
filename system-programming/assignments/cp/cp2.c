@@ -3,6 +3,7 @@
 #include<unistd.h> // 시스템콜(read, open, write.. )
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h> //strcmp -> If source and dest files are same, then creat new file will leads data loss. (the proper methods are using stat rather than strcmp, but currently i didn't learned bout stat. 수업에선 more 시 termios도 언급안함. )
 
 #define BUFFERSIZE 1024
 
@@ -24,6 +25,9 @@ int main(int argc, char* argv[]){
 
 
     if(argc != 3) error("Usage: %s source destination\n" ,argv[0]);
+
+    if(strcmp(argv[1], argv[2]) == 0) error("cp: %s are the same file\n", argv[1]); 
+    // fprintf(stderr, "%s: %s and %s are the same file\n", argv[0], argv[1], argv[2]); 
 
     // open file from sourcetxt
     int input_fd = open(argv[1], O_RDONLY);
