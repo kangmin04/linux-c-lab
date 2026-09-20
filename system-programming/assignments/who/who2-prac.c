@@ -8,6 +8,10 @@
 #include <stdlib.h> 
 
 void error(char* , char* );
+// void show_info(struct utmp * , FILE* stream); 
+// 난 처음에 outputfd로 fprintf에서 스트림으로 사용해서, show_info에 출력스트림만 다르게 주어, strategy pattern으로 작성하려했는데, fprintf는 fd가 아닌, stream(file* )만 받음. fd는 여전히 write 해줘야함. 
+
+// void show_info(struct utmp *); 
 int format_record(struct utmp* , char*, size_t) ; 
 
 int main(int argc, char* argv[]){
@@ -29,7 +33,8 @@ int main(int argc, char* argv[]){
         perror(argv[1]); 
         exit(1); 
     }
-     
+    
+    // open한 파일 그대로 argv[2]에 작성 + 터미널 출력  
     while((read_chars = read(utmp_fd, &current_record, utmp_struct_size)) == (ssize_t)utmp_struct_size){
         int n = format_record(&current_record, buf, sizeof(buf)); 
         if(n <= 0) continue; 
@@ -43,6 +48,21 @@ int main(int argc, char* argv[]){
             perror("outputFile");
             exit(1); 
         }
+
+        
+        //터미널에 출력 - show_info에 stdout으로 스트림 지정
+        // show_info(&current_record, stdout); 
+
+        //파일에 작성 - show_info에 file의 fd를 주자. 
+        // if(write(output_fd, &current_record, read_chars) != read_chars){
+        //     perror(argv[1]);
+        //     exit(1);
+        // }
+        /*
+            1. show_info에서 문자열 조립해서 리턴. -> 이 방식은 기능을 한 함수에 2개 구현하게됨. 
+            2. 차라리 뮌자열 조립이란 함수를 두고, 문자열 조립해서 그걸 str 형태로 바로 각각의 출력에 넣는 방식? 차라리 이게 나을듯. 
+        */
+        // show_info(&current_record, output_fd); 
     }
 
     if(read_chars == -1){
@@ -82,6 +102,21 @@ int format_record(struct utmp* ut_buf_pointer, char* out, size_t out_size){
 
     return n; 
 }
+
+// void show_info(struct utmp* ut_buf_pointer, FILE* stream ){
+// 	if(ut_buf_pointer->ut_type != USER_PROCESS) return; 
+
+// 	printf( "%-8.8s " , ut_buf_pointer->ut_user); 
+// 	printf( "%-8.8s " , ut_buf_pointer->ut_line); 
+	
+// 	time_t sec = ut_buf_pointer->ut_tv.tv_sec; 
+// 	char *ctime_str = ctime(&sec); 
+// 	ctime_str[strlen(ctime_str)-1] = '\0'; 
+// 	printf( "%s ", ctime_str); 
+// 	printf("(%s)", ut_buf_pointer->ut_host); 
+// 	printf( "\n"); 
+// }
+
 
 void error(char* errorLog, char* argv){
     fprintf(stderr, errorLog, argv);
