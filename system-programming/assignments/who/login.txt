@@ -1,0 +1,2 @@
+kangmin  seat0    Sep 22 10:46 (login screen)
+kangmin  tty2     Sep 22 10:46 (tty2)
