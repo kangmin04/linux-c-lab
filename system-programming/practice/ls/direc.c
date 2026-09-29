@@ -4,7 +4,13 @@
 #include <string.h> //strcpy
 #include <pwd.h> 
 #include <grp.h>
-
+#include <time.h>
+void do_ls(char[]);
+void do_stat(char *);
+void mode_to_letter(mode_t mode, char mode_str[11]);
+char *uid_to_name(uid_t);
+char *gid_to_name(gid_t);
+void show_file_info(char *, struct stat *);
 // DIR* opendir(const char *name); 
 // struct dirent *readdir(DIR *dirp); 
 /* 
@@ -14,11 +20,6 @@
 
 // C에서 !=는 =보다 우선순위가 높습니다
 
-// int stat(const char *pathname, struct stat *buf);
-// int lstat(const char *pathname, struct stat *buf);
-// 성공하면 0을 반환하며 두 번째 인자로 넘긴 buf가 채워지고, 실패하면 -1을 반환하며 errno가 설정된다
-
-
 // 우리가 hello.txt라는 파일 하나를 만들면, 디스크에는 두 가지가 따로 저장됩니다.
 
 //   - inode (몸통): 파일의 실제 정보입니다. 크기, 권한, 소유자, 수정 시각, 그리고 내용이 디스크의 어디에 있는지가 적혀 있습니다. 각 inode에는 번호가 붙습니다(예: 1234번).
@@ -27,9 +28,6 @@
 //   한쪽으로 내용을 고치면 다른 쪽에서도 바뀐 내용이 보임. 
 //   하드링크는  디렉토리에는 걸 수 없습니다
 //   심볼릭 링크는 자기만의 inode를 가진 별도의 작은 파일입니다. 그리고 그 내용은 "hello.txt"라는 경로 문자열뿐
-
-// struct passwd *getpwuid(uid_t uid);   // uid -> 사용자 정보
-// struct group  *getgrgid(gid_t gid);   // gid -> 그룹 정보
 
 void do_ls(char dirname[]){
     DIR * dir_ptr; 
@@ -42,11 +40,43 @@ void do_ls(char dirname[]){
 
     while(((pdirent = readdir(dir_ptr) )!= NULL)){
         if(pdirent->d_name[0] == '.') continue; // . .. 파일들 숨김
-        printf("%lu\n", pdirent->d_ino); 
-        printf("%s\n", pdirent->d_name); 
+        do_stat(pdirent->d_name); 
     }
 
     closedir(dir_ptr); 
+}
+// int stat(const char *pathname, struct stat *buf);
+// int lstat(const char *pathname, struct stat *buf);
+// 성공하면 0을 반환하며 두 번째 인자로 넘긴 buf가 채워지고, 실패하면 -1을 반환하며 errno가 설정된다
+
+void do_stat(char* filename){
+    struct stat buf; // 구조체 크기는 시스템 헤더가 정함. 
+    // printf("filename: %s\n", filename); 
+    if(stat(filename, &buf) == -1){ //stat을통해 filename 경로 따라가며 상태를 얻음. 
+        //perror는 전역변수 errno에 설정된 오류코드를 사람이 읽기 쉬운 표준오류 메시지로 출력. filename인자로 주면 먼저 filname: 출력하고 이후 error 값에 대응하는 시스템 오류 msg 출력 
+        printf("대체왜\n");
+        perror(filename); 
+    }else {
+        show_file_info(filename, &buf); 
+    }
+}
+
+void show_file_info(char* filename, struct stat* info_pointer){
+    char mode[11];  // 이거 10으로 하려하니까 accessing 11bytes in a region of size 10이라고 함. 확인해봐야할듯. 
+    mode_to_letter(info_pointer->st_mode, mode); 
+
+    /*
+        printf 서식
+        - : 왼쪽 정렬 
+        %-8 : 최소 8칸 차지하고 , 모자라면 공백으로 채우란것. 
+    */
+    printf("%s", mode);
+	printf("%4d ", (int)info_pointer->st_nlink);
+	printf("%-8s ", uid_to_name(info_pointer->st_uid));
+	printf("%-8s ", gid_to_name(info_pointer->st_gid));
+	printf("%8ld ", (long)info_pointer->st_size);
+	printf("%.12s ", 4 + ctime(&info_pointer->st_mtime));
+	printf("%s\n", filename);
 }
 
 
@@ -76,18 +106,45 @@ void mode_to_letter(mode_t mode, char str[11]){
     if (mode & S_IXOTH) str[9] = 'x';
 }
 
+// st_uid, st_gid 모두 그냥 정수임 사용자명으로 바꾸려면 사용자 db 조회하는 함수 필요함. 
+// struct passwd *getpwuid(uid_t uid);   // uid -> 사용자 정보 
+// struct group  *getgrgid(gid_t gid);   // gid -> 그룹 정보
+
 char* uid_to_name(uid_t uid){
     struct passwd *pw_ptr; 
-    static char numstr[16]; 
+    static char numstr[16]; //지역이 아니라 static으로 선언해야만 함
+    // static 없이 char numstr[16]선언 시 지역배열은 스택에 있어서 함수가 return 하는 순간 그 공간이 무효가 됨. 무효가 된 주소를 반환하면 호출자가 읽을 때쯤엔
+    // 다른 함수 호출이 그 자리를 덮어쓴 뒤일수도 있음. 
+    //static 붙이면 배열이 스택이 아닌 데이터영역에 한번만 만들어지고, 프로그램이 끝날때까지 살아있음. 그래서 주소 밖으로 반환해도 안전함. 
 
-    if((pw_ptr = getpwuid(uid)) == NULL){
-        sprintf(numstr, "%d", uid); 
+    if((pw_ptr = getpwuid(uid)) == NULL){ //getpwuid() : uid를 struct passwd로 반환
+        sprintf(numstr, "%u", uid); 
         return numstr; 
     }
 
     return pw_ptr->pw_name; 
 } 
-int main(){
-    do_ls("test");
+
+char* gid_to_name(gid_t gid){
+    struct group *gr_ptr ; 
+    static char numstr[16]; 
+
+    if((gr_ptr = getgrgid(gid)) == NULL){
+        sprintf(numstr, "%u", gid); 
+        return numstr; 
+    }
+    return gr_ptr->gr_name; 
+}
+int main(int argc, char* argv[]){
+    if(argc == 1){
+        do_ls("."); 
+        printf("ITIS CURRENT DIRECTORY RESULT\n");
+    }else{
+        while(--argc){
+            printf("%s: \n", *++argv);
+			do_ls(*argv);  
+        }
+    }
+
     return 0; 
 }
