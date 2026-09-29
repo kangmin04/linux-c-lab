@@ -5,8 +5,10 @@
 #include <pwd.h> 
 #include <grp.h>
 #include <time.h>
+#include <limits.h>
+
 void do_ls(char[]);
-void do_stat(char *);
+void do_stat(char *, char* );
 void mode_to_letter(mode_t mode, char mode_str[11]);
 char *uid_to_name(uid_t);
 char *gid_to_name(gid_t);
@@ -32,15 +34,19 @@ void show_file_info(char *, struct stat *);
 void do_ls(char dirname[]){
     DIR * dir_ptr; 
     struct dirent *pdirent; 
+    char path[PATH_MAX]; 
 
     if((dir_ptr = opendir(dirname)) == NULL){
         fprintf(stderr, "ls: cannot open %s\n", dirname);  
         return; 
     }
-
+    //기존 코드의 문제: opendir로 인자로 준 test디렉토리를 염. 그후 readdir까지 함. 이후 pdir->d_name으로 a.txt구함. a.txt를 바로 do_stat하는데 이때 stat은 현재 작업중인 디렉토리를 기준으로 파일/디렉토리의 상세정보를 탐색함. 
     while(((pdirent = readdir(dir_ptr) )!= NULL)){
-        if(pdirent->d_name[0] == '.') continue; // . .. 파일들 숨김
-        do_stat(pdirent->d_name); 
+        // if(pdirent->d_name[0] == '.') continue; // . .. 파일들 숨김
+        // do_stat(pdirent->d_name);
+        snprintf(path, sizeof path, "%s/%s", dirname, pdirent->d_name); 
+        printf("[DEBUG] path : %s\n", path); 
+        do_stat(path, pdirent->d_name);  
     }
 
     closedir(dir_ptr); 
@@ -49,13 +55,13 @@ void do_ls(char dirname[]){
 // int lstat(const char *pathname, struct stat *buf);
 // 성공하면 0을 반환하며 두 번째 인자로 넘긴 buf가 채워지고, 실패하면 -1을 반환하며 errno가 설정된다
 
-void do_stat(char* filename){
+void do_stat(char* path, char* filename){
     struct stat buf; // 구조체 크기는 시스템 헤더가 정함. 
     // printf("filename: %s\n", filename); 
-    if(stat(filename, &buf) == -1){ //stat을통해 filename 경로 따라가며 상태를 얻음. 
+    if(stat(path, &buf) == -1){ //stat을통해 filename 경로 따라가며 상태를 얻음. 
         //perror는 전역변수 errno에 설정된 오류코드를 사람이 읽기 쉬운 표준오류 메시지로 출력. filename인자로 주면 먼저 filname: 출력하고 이후 error 값에 대응하는 시스템 오류 msg 출력 
         printf("대체왜\n");
-        perror(filename); 
+        perror(path); 
     }else {
         show_file_info(filename, &buf); 
     }
