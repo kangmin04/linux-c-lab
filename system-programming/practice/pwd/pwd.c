@@ -4,17 +4,16 @@
 #include <stdlib.h>  // exit
 #include <unistd.h> // chdir 
 #include <string.h>  // strncpy
+#include <stdbool.h>
 
 ino_t getInode(char* ); 
-// void printPath(ch); 
-
-// void printPath(ino_t );
-// ino_t searchDirName(ino_t); 
-void searchDirName(ino_t); 
+void searchDirName(ino_t, bool); 
 
 int main(){
+    bool first_run = true; 
     ino_t startInode = getInode("."); 
-    searchDirName(startInode); 
+    // if(startInode == )
+    searchDirName(startInode, first_run); 
     printf("\n"); 
     return 0; 
 }
@@ -47,13 +46,19 @@ ino_t getInode(char* path){
 // }
 
 
-void searchDirName(ino_t inode){
+void searchDirName(ino_t inode, bool first_run){
+    
     // since it's searching, i will find .. in here
     //1. move .. 
     ino_t parentInode = getInode(".."); 
     if(inode == parentInode){
+        if(first_run){
+            printf("/");
+            return; 
+        }
         return ;  
     }
+
     if((chdir("..")) == -1){
         perror("chdir"); 
         exit(1); 
@@ -81,9 +86,14 @@ void searchDirName(ino_t inode){
             // return  getInode("."); 
         }
     }
-
+    // while 루프가 끝났을때 교재코드에선 while loop 나오면 못찾은거니 error 처리해줬는데(별도 함수에서 node_name 찾는 로직해줌,)
+    // 여기선 밑에 바로 searchDir으로 재귀로 들어가니 어케할지 고민이었다. 결국 dir_pointer의 값이 정답이었다. dir_pointer이 Null이면 그대로 나온것이니 이때만 error 처리해주면된다. 
+    if(dir_pointer == NULL) {
+        fprintf(stderr, "error looking for inode: %ld\n", (long int)inode);
+	    exit(1);
+    }
     closedir(dir); 
 
-    searchDirName(getInode(".")); 
+    searchDirName(getInode("."), false); 
     printf("/%s", foundname);   
 }
