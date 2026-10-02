@@ -1,3 +1,5 @@
+//2023014913, 김강민
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -17,7 +19,8 @@ int main(){
     //     return 0; 
     // }
 	print_path_to(startNode);
-	putchar('\n');
+	
+
 	return 0;
 }
 
@@ -57,6 +60,15 @@ void print_path_to(ino_t inode)
 	}
 
 	printf("/"); 
+    printf("\n\n-----------------------\n"); 
+    printf("Print working directory"); 
+    printf("\n-----------------------\n"); 
+
+    printf("/");
+    for(int i = depth - 1; i >=0 ; i--){
+        printf("%s/", fullpath[i]);
+    }
+
 }
 
 void inode_to_name(ino_t this_inode, char* namebuf, int buflen){
@@ -86,7 +98,7 @@ void inode_to_name(ino_t this_inode, char* namebuf, int buflen){
     }
     //진짜개시발미친놈 ㅋㅋ 계속 while 문이 오륜줄 알고뒤져봤는데 fprintf를 while 내에서 한거였음. pwd는 그냥 맨처음 돌았기에 넘어갔던거고 
     fprintf(stderr, "error looking for inode: %llu\n", (long long int)this_inode);
-	    exit(1);
+	exit(1);
 
 }
 
