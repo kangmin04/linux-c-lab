@@ -60,14 +60,15 @@ void print_path_to(ino_t inode)
 	}
 
 	printf("/"); 
-    printf("\n\n-----------------------\n"); 
+    printf("\n\n-------------------------\n"); 
     printf("Print working directory"); 
-    printf("\n-----------------------\n"); 
+    printf("\n-------------------------\n"); 
 
-    printf("/");
+    // printf("/");
     for(int i = depth - 1; i >=0 ; i--){
-        printf("%s/", fullpath[i]);
+        printf("/%s", fullpath[i]);
     }
+    printf("\n"); 
 
 }
 
