@@ -24,7 +24,7 @@ int main(int argc, char* argv[] ){
         }
         fputs(buf, stdout); 
         // 결국 마지막인지 체크하는건 맨 마지막에 읽은 buf값이 \n인지 아닌지로 여부 체크함. 
-        atLineStart = (buf[strlen(buf)-1] == '\n');
+        atLineStart = (buf[strlen(buf)-1] == '\n')
     }
     fclose(fp); 
     return 0;
