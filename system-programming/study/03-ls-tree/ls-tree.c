@@ -9,22 +9,27 @@ void print_path_to(ino_t inode);
 void find_directory_name(ino_t inode, char* , int );
 ino_t get_inode(char* pathname);
 void print_absolute_path(char* path);
-void do_ls(char* dirname, int depth); 
-void do_lstat(char* parent_dirname, char* child_dirname, int depth); 
+void do_ls(char* dirname, int depth, int* directory_count); 
+void do_lstat(char* parent_dirname, char* child_dirname, int depth, int* directory_count); 
 
 int main(int argc, char* argv[]){
+    int directory_count = 0; 
     if(argc == 1){
-        do_ls(".", 0); 
+        print_absolute_path(".");
+        do_ls(".", 0, &directory_count); 
+        printf("%d directories\n", directory_count); 
         return 0;
     }
     //절대경로 출력하기. 
     print_absolute_path(argv[1]); 
-    do_ls(argv[1], 1); 
+
+    do_ls(argv[1], 0, &directory_count); //
+    printf("%d directories\n", directory_count); 
     return 0; 
 }
 
 // do_ls에 depth 정보넣기 .
-void do_ls(char* dirname, int depth){
+void do_ls(char* dirname, int depth, int* directory_count){
     DIR* dir_ptr = NULL; 
     struct dirent* dirent_ptr = NULL; 
 
@@ -35,17 +40,17 @@ void do_ls(char* dirname, int depth){
 
     while((dirent_ptr = readdir(dir_ptr)) != NULL){
         // stat구해서 st_mode 를 S_IFDIR에 넣는것. 
-        if((strcmp(dirent_ptr->d_name, ".") == 0 ) || (strcmp(dirent_ptr->d_name, "..") == 0)) continue; 
+        if((strcmp(dㅎirent_ptr->d_name, ".") == 0 ) || (strcmp(dirent_ptr->d_name, "..") == 0)) continue; 
         // printf("After do_lstat(%s, %s)\n", dirname, dirent_ptr->d_name);
-        do_lstat(dirname, dirent_ptr->d_name, depth); 
+        do_lstat(dirname, dirent_ptr->d_name, depth, directory_count); 
        
     }
     closedir(dir_ptr); 
 }
 
-void do_lstat(char* parent_dirname, char* child_dirname, int depth){   
+void do_lstat(char* parent_dirname, char* child_dirname, int depth, int* directory_count){   
     struct stat stat_buffer; 
-    char directory_name[512]; 
+    char directory_name[512];
     snprintf(directory_name, 512, "%s/%s",  parent_dirname, child_dirname );
     if(lstat(directory_name, &stat_buffer) == -1) {
         fprintf(stderr, "lstat error"); 
@@ -55,25 +60,22 @@ void do_lstat(char* parent_dirname, char* child_dirname, int depth){
     //check whether directory or not
     if(S_ISDIR(stat_buffer.st_mode)){ // 이거 계속 틀리는데 주의하자 !!! . 구조체가 포인턴지 그냥 변순지 잘 파악 
         // directory
-        for(int i = 0; i < depth ; i++){
-            printf("----"); 
+        (*directory_count)++; 
+        depth++; // depth 한칸 증가시킴.  
+        for(int i = 0; i < depth - 1 ; i++){
+            printf("   "); 
         }
-        printf("%s\n", child_dirname); 
-        printf("        "); 
-        do_ls(directory_name, depth++);
-       
-
+        printf("|--%s\n", child_dirname); 
+        do_ls(directory_name, depth, directory_count);
     }
-
     //non-directory
-
 }
+
 void print_absolute_path(char* path){
     /*
         여기선 inode를 구하는 기준과 chdir(..)으로 올라가는 기준이 둘다 cwd라서 일치했음. 
         반면 여기선 argv[1]과 내 현재 폴더가(cwd)가 다를수있음 !!!!!
         argv[1]가 다른 디렉토리인 경우 여기로 chdir을 진행 한 후 inode를 구해야함. 
-
     */
     if(chdir(path) == -1){
         perror("chdir"); 
@@ -90,7 +92,7 @@ void print_path_to(ino_t inode){
         return; 
     }
     char name[256]; 
-    if( chdir("..") == -1){
+    if(chdir("..") == -1){
         perror("chdir"); 
         exit(1); 
     }
@@ -110,10 +112,13 @@ void find_directory_name(ino_t inode, char* buf, int buffersize){
 
     while(((dirent_ptr = readdir(dir_ptr))) != NULL){
         if(dirent_ptr->d_ino == inode){
-            strncpy(buf, dirent_ptr->d_name, buffersize); 
+            // strncpy(buf, dirent_ptr->d_name, buffersize); 
+            snprintf(buf, buffersize, "%s", dirent_ptr->d_name); 
+            //그렇다고 여기서 snprintf(buf, sizeof(buf), "%s", dirent_ptr->d_name); 는 아님 !!! buf는 여기서 포인터라 8바이트다. 
+            // snprintf는 항상 '\0'을 보장해줌 !!! 
             //PLEASE DONT FORGET TO CLOSE UR DIRECTORY. 
             closedir(dir_ptr); 
-            buf[buffersize-1] = '\0'; 
+            // buf[buffersize-1] = '\0'; 
             return ;  
            
         }
