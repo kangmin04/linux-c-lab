@@ -11,6 +11,9 @@ void searchDirName(ino_t, bool);
 
 int main(){
     bool first_run = true; 
+    /*
+        여기선 inode를 구하는 기준과 chdir(..)으로 올라가는 기준이 둘다 cwd라서 일치했음. 
+    */
     ino_t startInode = getInode("."); 
     // if(startInode == )
     searchDirName(startInode, first_run); 

@@ -14,16 +14,27 @@ void inode_to_name(ino_t, char *, int);
 
 int main(){
     ino_t startNode =  get_inode("."); 
-	print_path_to(startNode);
+	print_path_to(startNode); // 현재 디렉토리로 getinode 전달 
 	return 0;
 }
+
+
+//조건부 컴파일 !! 
+#ifdef DEBUG
+    //코드
+#else 
+    //코드2
+#endif  // 조건부컴파일. 
+// gcc 파일.c -DDEBUG -o 실행파일
+// (-D가 조건부 컴파일 옵션)
 
 
 void print_path_to(ino_t inode)
 {
     int depth = 0; 
-    char fullpath[20][256]; 
-
+    char fullpath[20][256]; // recursive애 따라서 tree가 됨. 
+    memset() // 쓰레기값 들어가는거 막고자 이거 사용하심. 
+    char ist_name[256] // 으로 its_name에 적으심  이후 strncpy로 ith인덱스에 할당. 
 	while (get_inode("..") != inode) 
 	{
 		chdir("..");

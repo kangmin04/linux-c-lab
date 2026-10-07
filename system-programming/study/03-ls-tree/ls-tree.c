@@ -9,25 +9,24 @@ void print_path_to(ino_t inode);
 void find_directory_name(ino_t inode, char* , int );
 ino_t get_inode(char* pathname);
 void print_absolute_path(char* path);
-void do_ls(char* dirname); 
-void do_lstat(char* parent_dirname, char* child_dirname); 
+void do_ls(char* dirname, int depth); 
+void do_lstat(char* parent_dirname, char* child_dirname, int depth); 
 
 int main(int argc, char* argv[]){
     if(argc == 1){
-        // do_ls("."); 
+        do_ls(".", 0); 
         return 0;
     }
-    char* path = argv[1]; 
     //절대경로 출력하기. 
-    print_absolute_path(path); 
-    do_ls("/home/kangmin/lab/system-programming/assignments"); 
+    print_absolute_path(argv[1]); 
+    do_ls(argv[1], 1); 
     return 0; 
 }
 
-
-void do_ls(char* dirname){
-    DIR* dir_ptr; 
-    struct dirent* dirent_ptr; 
+// do_ls에 depth 정보넣기 .
+void do_ls(char* dirname, int depth){
+    DIR* dir_ptr = NULL; 
+    struct dirent* dirent_ptr = NULL; 
 
     if((dir_ptr = opendir(dirname)) == NULL){
         fprintf(stderr, "failed to open directory"); 
@@ -38,13 +37,13 @@ void do_ls(char* dirname){
         // stat구해서 st_mode 를 S_IFDIR에 넣는것. 
         if((strcmp(dirent_ptr->d_name, ".") == 0 ) || (strcmp(dirent_ptr->d_name, "..") == 0)) continue; 
         // printf("After do_lstat(%s, %s)\n", dirname, dirent_ptr->d_name);
-        do_lstat(dirname, dirent_ptr->d_name); 
+        do_lstat(dirname, dirent_ptr->d_name, depth); 
        
     }
     closedir(dir_ptr); 
 }
 
-void do_lstat(char* parent_dirname, char* child_dirname){   
+void do_lstat(char* parent_dirname, char* child_dirname, int depth){   
     struct stat stat_buffer; 
     char directory_name[512]; 
     snprintf(directory_name, 512, "%s/%s",  parent_dirname, child_dirname );
@@ -56,8 +55,13 @@ void do_lstat(char* parent_dirname, char* child_dirname){
     //check whether directory or not
     if(S_ISDIR(stat_buffer.st_mode)){ // 이거 계속 틀리는데 주의하자 !!! . 구조체가 포인턴지 그냥 변순지 잘 파악 
         // directory
-        do_ls(directory_name);
-        printf("----%s", child_dirname); 
+        for(int i = 0; i < depth ; i++){
+            printf("----"); 
+        }
+        printf("%s\n", child_dirname); 
+        printf("        "); 
+        do_ls(directory_name, depth++);
+       
 
     }
 
@@ -65,7 +69,17 @@ void do_lstat(char* parent_dirname, char* child_dirname){
 
 }
 void print_absolute_path(char* path){
-    ino_t current_inode = get_inode(path); 
+    /*
+        여기선 inode를 구하는 기준과 chdir(..)으로 올라가는 기준이 둘다 cwd라서 일치했음. 
+        반면 여기선 argv[1]과 내 현재 폴더가(cwd)가 다를수있음 !!!!!
+        argv[1]가 다른 디렉토리인 경우 여기로 chdir을 진행 한 후 inode를 구해야함. 
+
+    */
+    if(chdir(path) == -1){
+        perror("chdir"); 
+        exit(1); 
+    }
+    ino_t current_inode = get_inode("."); 
     print_path_to(current_inode); 
     printf("\n");
 }
@@ -76,7 +90,10 @@ void print_path_to(ino_t inode){
         return; 
     }
     char name[256]; 
-    chdir(".."); 
+    if( chdir("..") == -1){
+        perror("chdir"); 
+        exit(1); 
+    }
     find_directory_name(inode, name, 256); 
     print_path_to(get_inode(".")); 
     printf("/%s" , name); 
@@ -91,7 +108,7 @@ void find_directory_name(ino_t inode, char* buf, int buffersize){
         exit(1); 
     }
 
-    while((dirent_ptr = readdir(dir_ptr)) != NULL){
+    while(((dirent_ptr = readdir(dir_ptr))) != NULL){
         if(dirent_ptr->d_ino == inode){
             strncpy(buf, dirent_ptr->d_name, buffersize); 
             //PLEASE DONT FORGET TO CLOSE UR DIRECTORY. 
@@ -100,6 +117,9 @@ void find_directory_name(ino_t inode, char* buf, int buffersize){
             return ;  
            
         }
+        // else{
+        //     printf("[debug] There is no %s that match to what we are looking for\n", dirent_ptr->d_name); 
+        // }
     }
     closedir(dir_ptr); 
     //올라간 디렉토리에 찾고자 한 inode가 없는경우
