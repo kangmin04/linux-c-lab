@@ -12,6 +12,8 @@ void print_absolute_path(char* path);
 void do_ls(char* dirname, int depth, int* directory_count); 
 void do_lstat(char* parent_dirname, char* child_dirname, int depth, int* directory_count); 
 
+char store[1024] = {0}; 
+
 int main(int argc, char* argv[]){
     int directory_count = 0; 
     if(argc == 1){
@@ -22,8 +24,8 @@ int main(int argc, char* argv[]){
     }
     //절대경로 출력하기. 
     print_absolute_path(argv[1]); 
-
-    do_ls(argv[1], 0, &directory_count); //
+    //chdir은 루트기준이라 .. -> 이럴땐 /에서 절대경로로 이동해야하기에 !
+    do_ls(".", 0, &directory_count); // 수정사항: 기존엔 do_ls에서 바로 argv호출했엇는데 현재의 코드는 절대 경로 출력 후 cwd가 루트로 올라간걸 print_absolute_path에서 다시 현재 argv로 이동하는 로직이 추가됐기에. 현재 디렉토리를 참조하면 됨. 
     printf("%d directories\n", directory_count); 
     return 0; 
 }
@@ -35,14 +37,14 @@ void do_ls(char* dirname, int depth, int* directory_count){
 
     if((dir_ptr = opendir(dirname)) == NULL){
         fprintf(stderr, "failed to open directory"); 
-        exit(1); 
+        return;  // 권한없는 디렉토리는 그냥 넘어감 ! 
     }
 
     while((dirent_ptr = readdir(dir_ptr)) != NULL){
         // stat구해서 st_mode 를 S_IFDIR에 넣는것. 
-        if((strcmp(dㅎirent_ptr->d_name, ".") == 0 ) || (strcmp(dirent_ptr->d_name, "..") == 0)) continue; 
+        if((strcmp(dirent_ptr->d_name, ".") == 0 ) || (strcmp(dirent_ptr->d_name, "..") == 0)) continue; 
         // printf("After do_lstat(%s, %s)\n", dirname, dirent_ptr->d_name);
-        do_lstat(dirname, dirent_ptr->d_name, depth, directory_count); 
+        do_lstat(dirname, dirent_ptr->d_name, d epth, directory_count); 
        
     }
     closedir(dir_ptr); 
@@ -51,8 +53,9 @@ void do_ls(char* dirname, int depth, int* directory_count){
 void do_lstat(char* parent_dirname, char* child_dirname, int depth, int* directory_count){   
     struct stat stat_buffer; 
     char directory_name[512];
+    // readdir이 주는 d_name을 받는데, 이건 어느 디렉토리의 이름인지 모름. 
     snprintf(directory_name, 512, "%s/%s",  parent_dirname, child_dirname );
-    if(lstat(directory_name, &stat_buffer) == -1) {
+    if(lstat(directory_name, &stat_buffer    ) == -1) {
         fprintf(stderr, "lstat error"); 
         exit(1); 
     }
@@ -81,9 +84,15 @@ void print_absolute_path(char* path){
         perror("chdir"); 
         exit(1); 
     }
+    store[0] = '\0'; // 시작전에 비우기 
     ino_t current_inode = get_inode("."); 
-    print_path_to(current_inode); 
-    printf("\n");
+    print_path_to(current_inode);  // 여기서 cwd가 루트까지 올라감. 
+    if(store[0] == '\0') strcpy(store, "/"); 
+    printf("%s\n",store);
+    if(chdir(store) == -1){ //절대 경로로 복귀 
+        perror("child"); 
+        exit(1); 
+    }
 }
 
 void print_path_to(ino_t inode){
@@ -98,7 +107,8 @@ void print_path_to(ino_t inode){
     }
     find_directory_name(inode, name, 256); 
     print_path_to(get_inode(".")); 
-    printf("/%s" , name); 
+    strcat(store, "/"); 
+    strcat(store, name); 
 }
 
 void find_directory_name(ino_t inode, char* buf, int buffersize){
