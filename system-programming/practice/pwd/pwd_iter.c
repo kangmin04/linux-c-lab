@@ -19,16 +19,13 @@ int main(){
     //     return 0; 
     // }
 	print_path_to(startNode);
-	
-
 	return 0;
 }
 
-
-void print_path_to(ino_t inode)
-{
+void print_path_to(ino_t inode){
     int depth = 0; 
     char fullpath[20][256]; 
+    
     /*
         즉, while 반복을 돌리면서 
         1. 상위로 한 디렉토리 올라감. 
@@ -38,7 +35,6 @@ void print_path_to(ino_t inode)
 
 	while (get_inode("..") != inode) // 여기서 inode는 현재 내 디렉토리 = 내가 찾고자하는 디렉토리
 	{
-        
         // printf(".의 inode : %llu\n", (long long int)get_inode(".")); 
         // printf("..의 inode : %llu\n", (long long int)get_inode("..")); 
 		chdir(".."); // 여기서 한단계 올라옴 -> practice로 올라감.   // 이 practice에서 내 pwd(inode)를 찾는게 과제
