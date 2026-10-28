@@ -17,7 +17,7 @@ void show_file_info(char *, struct stat *);
 // struct dirent *readdir(DIR *dirp); 
 /* 
     readdir()가 NULL을 반환하는 경우는 두 가지다 — ① 디렉토리 끝에 정상적으로 도달했을 때, ② 실제 에러(예: 잘못된 DIR *, I/O 오류)가 발생했을 때. 리턴값(NULL)만 봐서는 이 둘을 구분할 수
-    eaddir()는 정상적으로 끝에 도달했을 때는 errno를 건드리지 않으므로, 호출 전에 errno = 0으로 직접 초기화해두고 NULL을 받은 뒤 errno가 여전히 0이면 정상 종료, 0이 아니면(예: EBADF) 진짜 에러로 판단해야 한다.
+    readdir()는 정상적으로 끝에 도달했을 때는 errno를 건드리지 않으므로, 호출 전에 errno = 0으로 직접 초기화해두고 NULL을 받은 뒤 errno가 여전히 0이면 정상 종료, 0이 아니면(예: EBADF) 진짜 에러로 판단해야 한다.
 */
 
 // C에서 !=는 =보다 우선순위가 높습니다

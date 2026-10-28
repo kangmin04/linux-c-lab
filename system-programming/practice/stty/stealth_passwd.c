@@ -3,6 +3,7 @@
 #include <termios.h>  // tcflag_t(unsigned int) 타입의 c_lflag에서 주로 ISiG, ICANNON, ECHO 등 조정함 
 #include <string.h> 
 #include <stdlib.h> 
+#include <fcntl.h> 
 
 void turnOffEcho(struct termios* info);
 // void turnOnEcho(struct termios* info); 
@@ -22,6 +23,7 @@ int main(){
 
     turnOffEcho(&original); 
 
+    //교수님은 while(trial < MAX_TRIAL로
     for(int cnt = 1; cnt <= 3; cnt++){
         getPasswd(password); 
         if(strcmp(init_password, password) == 0){
@@ -60,10 +62,11 @@ void restoreTerminal(struct termios* original_state){
 
 void getPasswd(char* password){
     printf("Enter Password: ");
-    fgets(password, 128, stdin); //fgets는 전달받은 버퍼(포인터)의 첫 번째 바이트(index 0)부터 읽어온 문자열을 새로 채워 넣음 -> 오버라이트
-    // password[strlen(password) - 1] = '\0'; 
+    fgets(password, 128, stdin); 
+    //fgets는 전달받은 버퍼(포인터)의 첫 번째 바이트(index 0)부터 읽어온 문자열을 새로 채워 넣음 -> 오버라이트
+    // password[strlen(password) - 1] = '\0'; b
     password[strcspn(password, "\n")] = '\0'; 
-    // • size_t strcspn(const char *str1, const char *str2);
+    // size_t strcspn(const char *str1, const char *str2);
     //str1 문자열의 처음부터 시작하여 str2에 포함된 문 중 어느 하나라도 일치하는 문자가 나올 때까지 세어본 누적 개수를 리턴
 
     // printf("password : %s\n", password); 
@@ -79,3 +82,40 @@ void getPasswd(char* password){
 // 공백 포함 읽기: 줄바꿈(\n)을 만날 때까지 한 줄 전체를 읽어옵니다.
 // 버퍼 오버플로우 방지: 버퍼의 maximum 크기를 직접 지정하므로 안전합니다.
 // Null 종단 보장: 지정한 크기만큼 안전하게 읽고 항상 마지막에 \0을 붙여줍니
+
+// if(strcmp(password, sizeof(passwd), stdin) == NULL){
+//     printf("error reading input")
+// }else{
+//     password[strlen(password) - 1] = '\0'
+// }
+
+// if(strcmp(password, init_password) == 0){
+//     //corret
+//     break; else{
+//         printf("password wrong"); 
+//         memset(passwd, 0 sizeof(password)); // 이걸 해주신다 !!!!! 
+//     }
+// }
+
+
+
+// turnoff mode
+
+void tty(int how){
+    static struct termios orig_termios; 
+    static int orig_flags; 
+    if(how == 0){ // backup 본 설정 
+        if(tcgetattr(0, &orig_termios) == -1) printf("err");
+        orig_flags = fcntl(0, F_GETFL); 
+    }else if (how == 1){
+        tcsetattr(0, TCSANOW, &orig_termios); 
+    }
+}
+
+
+void set_non_blocking_mode(){
+    int terflags; 
+    fcntl(0, F_GETFL); 
+    terflags |= O_NONBLOCK; 
+    fcntl(0, F_SETFL, terflags); 
+}

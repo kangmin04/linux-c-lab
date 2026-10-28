@@ -41,8 +41,7 @@ int main(int argc, char* argv[]){
         return 0; 
     }
 
-    //argc 4 case
-   
+    //argc 4 case - option 존재하는 경우 
     //디렉토리에 존재하는지를 체크헤야함 !!! 이미 존재할 경우 overwrite dest? (y/n) 를 출력하고 키보드로 답을 받는다.
     // argv[3]에 대한 디렉토리 조사가 필요하다.....
     struct stat stat_buf; 
@@ -54,6 +53,7 @@ int main(int argc, char* argv[]){
 
     int c = 0; 
     struct stat srcBuf; 
+    //dest위치의 파일이 이미 존재하는지부터 체크 
     if((stat(argv[3], &stat_buf)) == 0 ){ // stat으로 내가 지정한 위치에 해당 파일이 존재하는지 여부 체크함. 
          if(stat(argv[2], &srcBuf) == -1) perror("error argv stat"); 
                 if(srcBuf.st_dev == stat_buf.st_dev && srcBuf.st_ino == stat_buf.st_ino){
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]){
 
         }
         
-    }else{
+    }else{ //dest에 없는 경우니 overwrite 물어볼 필요도 없이 normal Cp를 해서 만든 후 cp하면 됨 
         //normal cp 
         cpCompany(argv[2], argv[3]);
     }

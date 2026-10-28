@@ -26,7 +26,7 @@ int main(int ac, char* av[]){
 
     // mode_t before = stat_buf.st_mode; 
     // int chmod(const char *path, mode_t mode); 성공 시 0, 실패 시 -1
-    if(chmod(av[2], newmode) == -1) {perror("error in chmod"); exit(1); }
+    if(chmod(av[2], newmode) == -1) {perror("error in ch테mod"); exit(1); }
     // printf("before mode: %s -> ", before); 
     printf("%o\n", newmode); 
     return 0;
@@ -35,7 +35,7 @@ int main(int ac, char* av[]){
 mode_t octal_to_mode(char* str){
     mode_t mode = 0; ; 
     // const char* octTable[] = {"---", "--x", "010", "011", "100", "101", "110", "111"}
-    for(int i = 0; str[i]; i++){
+    for(int i = 0; str[i] != '\0'; i++){
         // if(str[i] == '0') continue; 
         // int number = str[i] - '0'; 
         if (str[i] < '0' || str[i] > '7') { fprintf(stderr, "bad digit\n"); exit(1); }

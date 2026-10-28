@@ -25,7 +25,7 @@ int main(){
 void print_path_to(ino_t inode){
     int depth = 0; 
     char fullpath[20][256]; 
-    
+    memset(fullpath, 0, sizeof(memset)); 
     /*
         즉, while 반복을 돌리면서 
         1. 상위로 한 디렉토리 올라감. 

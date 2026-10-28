@@ -44,7 +44,9 @@ void show_info(struct utmp* ut_buf_pointer){
 	char *ctime_str = ctime(&sec); 
 	ctime_str[strlen(ctime_str)-1] = '\0'; 
 	printf("%s ", ctime_str); 
-	printf("(%s)", ut_buf_pointer->ut_host); 
+	if(ut_buf_pointer->ut_host[0] != '\0'){
+		printf("(%s)", ut_buf_pointer->ut_host); 
+	}
 	printf("\n"); 
 }
 

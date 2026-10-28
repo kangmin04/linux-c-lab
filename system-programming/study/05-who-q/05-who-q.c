@@ -59,6 +59,7 @@ void print_utmp_info(struct utmp* info_utmp){ // 궁금증. 원래는 처음에 
     printf(" ");
     time_t sec = (time_t)info_utmp->ut_tv.tv_sec; 
     char* convertedTime = ctime(&sec); 
+    convertedTime[strlen(convertedTime) - 1] = '\0'; 
     printf("%12.12s", convertedTime+4); 
 
     if(info_utmp->ut_host[0] != '\0'){

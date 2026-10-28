@@ -89,7 +89,7 @@ void print_absolute_path(char* path){
     print_path_to(current_inode);  // 여기서 cwd가 루트까지 올라감. 
     if(store[0] == '\0') strcpy(store, "/"); 
     printf("%s\n",store);
-    if(chdir(store) == -1){ //절대 경로로 복귀 
+    if(chdir(store) == -1){ //절대 경로로 우리가 처음 봐야하는 파일 디렉터리로 복귀 
         perror("child"); 
         exit(1); 
     }
